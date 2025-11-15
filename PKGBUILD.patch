@@ -1,0 +1,76 @@
+From 0d876b44cdea8974b5cea5ae661110adacba5f6b Mon Sep 17 00:00:00 2001
+From: Uippao <uippao@proton.me>
+Date: Sat, 15 Nov 2025 15:56:46 +0200
+Subject: [PATCH] modify PKGBUILD
+
+---
+ PKGBUILD | 37 ++++++++++++++++++++++++-------------
+ 1 file changed, 24 insertions(+), 13 deletions(-)
+
+diff --git a/PKGBUILD b/PKGBUILD
+index ab7c9d5..0376068 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -1,23 +1,34 @@
+-# Maintainer: Jguer <pkgbuilds at jguer.space>
+-pkgname=yay
++# Maintainer: Uippao <uippao@proton.me>
++pkgname=yay-uippao
+ pkgver=12.5.2
+-pkgrel=2
+-pkgdesc="Yet another yogurt. Pacman wrapper and AUR helper written in go."
++pkgrel=1
++pkgdesc="Yet another yogurt. Pacman wrapper and AUR helper written in go. Includes custom patches by Uippao."
+ arch=('i686' 'pentium4' 'x86_64' 'arm' 'armv7h' 'armv6h' 'aarch64' 'riscv64')
+ url="https://github.com/Jguer/yay"
+ options=(!lto)
+ license=('GPL-3.0-or-later')
+-depends=(
+-  'pacman>6.1'
+-  'git'
+-)
++depends=('pacman>6.1' 'git')
+ optdepends=(
+   'sudo: privilege elevation'
+   'doas: privilege elevation'
+ )
+-makedepends=('go>=1.24')
+-source=("${pkgname}-${pkgver}.tar.gz::https://github.com/Jguer/yay/archive/v${pkgver}.tar.gz")
+-sha256sums=('f1a089862b56a0ecd04c28d3e10d9964dc54c8477b38ffcf8a820ece11e80580')
++makedepends=('go>=1.24' 'patch')
++source=(
++  "${pkgname}-${pkgver}.tar.gz::https://github.com/Jguer/yay/archive/v${pkgver}.tar.gz"
++  "repo-colors.patch::https://github.com/Uippao/yay-uippao/raw/main/repo-colors.patch"
++)
++sha256sums=(
++  'f1a089862b56a0ecd04c28d3e10d9964dc54c8477b38ffcf8a820ece11e80580'
++  'SKIP'
++)
++
++provides=('yay')
++conflicts=('yay')
++
++prepare() {
++  cd "$srcdir/yay-${pkgver}"
++  patch -Np1 -i "$srcdir/repo-colors.patch"
++}
+ 
+ build() {
+   export GOPATH="$srcdir"/gopath
+@@ -27,11 +38,11 @@ build() {
+   export CGO_LDFLAGS="${LDFLAGS}"
+   export CGO_ENABLED=1
+ 
+-  cd "$srcdir/$pkgname-$pkgver"
++  cd "$srcdir/yay-${pkgver}"
+   make VERSION=$pkgver DESTDIR="$pkgdir" PREFIX="/usr" build
+ }
+ 
+ package() {
+-  cd "$srcdir/$pkgname-$pkgver"
++  cd "$srcdir/yay-${pkgver}"
+   make VERSION=$pkgver DESTDIR="$pkgdir" PREFIX="/usr" install
+ }
+-- 
+2.51.2
+
