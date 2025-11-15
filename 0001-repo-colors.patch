@@ -1,0 +1,57 @@
+From ec9c38834f5bee727897b163419a569c740e4a7c Mon Sep 17 00:00:00 2001
+From: Uippao <uippao@proton.me>
+Date: Sat, 15 Nov 2025 15:34:17 +0200
+Subject: [PATCH] repo colors
+
+---
+ pkg/text/color.go | 24 ++++++++++++++++++++++--
+ 1 file changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/pkg/text/color.go b/pkg/text/color.go
+index d27f9e7..b7cb0f6 100644
+--- a/pkg/text/color.go
++++ b/pkg/text/color.go
+@@ -53,18 +53,38 @@ func Bold(in string) string {
+ 	return stylize(boldCode, in)
+ }
+ 
+-// ColorHash Colors text using a hashing algorithm. The same text will always produce the
++func Color256(code int, in string) string {
++	if UseColor {
++		return fmt.Sprintf("\x1b[38;5;%dm%s\x1b[0m", code, in)
++	}
++	return in
++}
++
++
++// ColorHash Colors text using a hashing algorithm, and hardcoded for specific repos. The same text will always produce the
+ // same color while different text will produce a different color.
+ func ColorHash(name string) (output string) {
+ 	if !UseColor {
+ 		return name
+ 	}
+ 
++	switch name {
++		case "endeavouros":
++			return Color256(55, name)
++
++		case "chaotic-aur":
++			return Color256(28, name)
++
++		case "community":
++			return Magenta(name)
++	}
++
+ 	var hash uint = 5381
+ 
+ 	for i := 0; i < len(name); i++ {
+-		hash = uint(name[i]) + ((hash << 5) + (hash))
++		hash = uint(name[i]) + ((hash << 5) + hash)
+ 	}
+ 
+ 	return fmt.Sprintf("\x1b[%dm%s\x1b[0m", hash%6+31, name)
+ }
++
+-- 
+2.51.2
+
